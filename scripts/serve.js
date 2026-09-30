@@ -1,11 +1,15 @@
 // Zero-dependency static server for running WeBook in a browser.
-// Usage: node scripts/serve.js [port]   (default 8080)
+// Usage: node scripts/serve.js [port] [--open]   (default port 8080)
+//   --open  also opens the book in your default browser
 const http = require('http');
+const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..', 'src');
-const port = Number(process.argv[2] || process.env.PORT || 8080);
+const args = process.argv.slice(2);
+const openBrowser = args.includes('--open');
+const port = Number(args.find((a) => /^\d+$/.test(a)) || process.env.PORT || 8080);
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -31,5 +35,12 @@ http.createServer((req, res) => {
     res.end(data);
   });
 }).listen(port, () => {
-  console.log(`WeBook is running at http://localhost:${port}  (Ctrl+C to stop)`);
+  const url = `http://localhost:${port}`;
+  console.log(`WeBook is running at ${url}  (Ctrl+C to stop)`);
+  if (openBrowser) {
+    const cmd = process.platform === 'win32' ? `start "" "${url}"`
+      : process.platform === 'darwin' ? `open "${url}"`
+      : `xdg-open "${url}"`;
+    exec(cmd, (err) => { if (err) console.log(`Open ${url} in your browser.`); });
+  }
 });

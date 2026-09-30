@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "web": "node scripts/serve.js",
+    "web": "node scripts/serve.js --open",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
     "dist:linux": "electron-builder --linux"

@@ -54,28 +54,42 @@ The desktop app also has **File / Go / View** menus. For example, <kbd>Ctrl</kbd
 
 ## Running it
 
-You need [Node.js](https://nodejs.org/) 18 or newer for the desktop app.
+**Quickest way: no download, starts instantly.** Open `src/index.html` in Chrome, Edge or Firefox, or run:
+```bash
+npm run web        # serves the book and opens it in your browser
+```
+The browser version has every feature of the desktop app.
 
 ### Windows
-Double-click **`start-windows.bat`**. The first run installs the app, and after that it opens WeBook in its own window.
-Run `start-windows.bat web` to use your browser instead.
+Double-click **`start-windows.bat`**. It opens the desktop app if it's ready and otherwise opens the browser version straight away.
+Run `start-windows.bat desktop` to get the desktop app, which downloads the Electron runtime once.
 
 ### Ubuntu / Linux
 ```bash
-./start-ubuntu.sh        # desktop app
-./start-ubuntu.sh web    # in your browser at http://localhost:8080
+./start-ubuntu.sh            # desktop app if ready, otherwise browser version (instant)
+./start-ubuntu.sh desktop    # desktop app (one-time ~100 MB Electron download)
+./start-ubuntu.sh web        # browser version at http://localhost:8080
 ```
 If Node.js is missing, install it with `sudo apt install nodejs npm`.
 
-### No install at all
-Open `src/index.html` directly in Chrome, Edge or Firefox.
-
-### With npm
+### Desktop app with npm
 ```bash
 npm install
-npm start          # desktop app
-npm run web        # browser version at http://localhost:8080
+npm start
 ```
+The first `npm start` downloads the Electron runtime (~100 MB) from GitHub. This happens only once.
+
+### Slow "Downloading Electron binary…"?
+Press <kbd>Ctrl</kbd>+<kbd>C</kbd> and use a download mirror instead. The file is still checked against Electron's official checksums.
+```bash
+# Ubuntu / Linux
+ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/" npm start
+
+# Windows (Command Prompt)
+set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
+npm start
+```
+You can also download a ready-made installer (`.deb`, `.AppImage` or `.exe`) from the GitHub Actions build artifacts instead.
 
 ## Building installers
 
