@@ -46,10 +46,13 @@
 
   function coverFace(book) {
     const author = book.author ? `<p class="cover-author readable">${escapeHtml(book.author)}</p>` : '';
+    const portrait = book.coverImage
+      ? `<div class="cover-portrait"><img src="${escapeHtml(book.coverImage)}" alt=""></div>`
+      : '<div class="cover-ornament">❦</div>';
     return el(`
       <div class="page cover" style="--cover:${book.cover}">
-        <div class="cover-frame">
-          <div class="cover-ornament">❦</div>
+        <div class="cover-frame${book.coverImage ? ' has-portrait' : ''}">
+          ${portrait}
           <h1 class="cover-title readable">${escapeHtml(book.title || 'Untitled')}</h1>
           <div class="cover-rule"></div>
           <p class="cover-subtitle readable">${escapeHtml(book.subtitle || '')}</p>
@@ -98,10 +101,14 @@
 
   function pageFace(face) {
     const p = face.page;
-    const img = p.image ? `<figure class="page-figure"><img src="${p.image}" alt=""></figure>` : '';
+    const img = p.image
+      ? `<figure class="page-figure style-${p.imageStyle || 'photo'}"><img src="${escapeHtml(p.image)}" alt=""></figure>`
+      : '';
     const title = p.title ? `<h2 class="page-title readable">${escapeHtml(p.title)}</h2>` : '';
+    // Drop caps only suit text that starts with a letter (not an emoji or bullet).
+    const dropCap = /^[\s*_]*\p{L}/u.test(p.body || '') ? ' drop-cap' : '';
     return el(`
-      <div class="page theme-${p.theme} font-${p.font} align-${p.align}" data-page-id="${escapeHtml(p.id)}">
+      <div class="page theme-${p.theme} font-${p.font} align-${p.align}${dropCap}" data-page-id="${escapeHtml(p.id)}">
         <div class="page-inner">
           ${title}
           ${img}

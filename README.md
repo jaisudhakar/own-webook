@@ -4,6 +4,13 @@ A 3D flip-page book you can write in. WeBook runs as a desktop app on **Windows*
 
 ![WeBook icon](build/icon.png)
 
+## Demo: Sudhakar's portfolio
+
+WeBook opens with a demo portfolio book for **Sudhakar**, a full-stack eCommerce developer. It has a photo on the cover and pages for the introduction, overview, services, tech stack, projects and contact.
+If you already had a book saved, open the demo from **⚙ Book settings → Demo books → Sudhakar's portfolio**. The **Feature tour** book is there too.
+
+The demo's content is in `src/js/demo-portfolio.js`. Edit that file to change it, or edit the pages in the app with ✎.
+
 ## Features
 
 **Book model**
@@ -15,7 +22,8 @@ A 3D flip-page book you can write in. WeBook runs as a desktop app on **Windows*
 - **＋ New Page** (or the <kbd>N</kbd> key) opens an editor with a live preview
 - 7 paper styles: classic, parchment, lined notebook, grid, rose, mint and midnight
 - 4 text styles: book serif, clean sans, handwritten and typewriter; three alignments
-- Add a picture, shown as a taped-in photo (it is resized automatically)
+- Add a picture and pick a style: taped photo, round portrait with a turning gold ring, or full width (pictures are resized automatically)
+- Add a photo to the cover in book settings
 - Insert the new page after the page you are reading, at the start, or at the end
 - Hover over a page and use ✎ to edit it or ✕ to delete it
 - Book settings: title, subtitle, author and cover colour
@@ -127,7 +135,8 @@ src/js/flipbook.js    3D page-flip engine (click, drag, riffle, corner peek)
 src/js/render.js      turns the book model into page faces
 src/js/effects.js     particles, confetti, synthesised sounds
 src/js/reader.js      read aloud (Web Speech API), word highlighting
-src/js/storage.js     book model, autosave, import/export, image resizing
+src/js/storage.js     book model, autosave, import/export, image resizing, demo books
+src/js/demo-portfolio.js  the portfolio demo book (photo embedded)
 src/js/app.js         toolbar, editor, settings, contents, keyboard
 scripts/serve.js      zero-dependency web server
 scripts/render-icon.js  regenerates build/icon.png from src/assets/icon.svg

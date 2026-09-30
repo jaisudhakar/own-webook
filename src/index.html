@@ -106,6 +106,13 @@
             <label class="file-label">Picture
               <input type="file" id="fImage" accept="image/*">
             </label>
+            <label>Picture style
+              <select id="fImageStyle">
+                <option value="photo">Taped photo</option>
+                <option value="round">Round portrait</option>
+                <option value="wide">Full width</option>
+              </select>
+            </label>
             <button type="button" class="btn btn-ghost" id="fImageClear">Remove picture</button>
           </div>
           <label id="fPositionWrap">Insert
@@ -149,6 +156,20 @@
         </label>
         <label>Cover colour</label>
         <div class="swatches" id="sCover" role="radiogroup" aria-label="Cover colour"></div>
+        <div class="row">
+          <label class="file-label">Cover photo
+            <input type="file" id="sCoverImage" accept="image/*">
+          </label>
+          <span class="cover-thumb" id="sCoverThumb" aria-hidden="true"></span>
+          <button type="button" class="btn btn-ghost" id="sCoverImageClear">Remove photo</button>
+        </div>
+        <fieldset class="voice-settings demo-books">
+          <legend>📚 Demo books</legend>
+          <div class="row">
+            <button type="button" class="btn" data-demo="portfolio">📇 Sudhakar's portfolio</button>
+            <button type="button" class="btn" data-demo="tour">✨ Feature tour</button>
+          </div>
+        </fieldset>
         <fieldset class="voice-settings">
           <legend>🗣 Read-aloud voice</legend>
           <label>Voice
@@ -183,6 +204,7 @@
   <input type="file" id="importInput" accept=".json,.webook,application/json" hidden>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
+  <script src="js/demo-portfolio.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/effects.js"></script>
   <script src="js/reader.js"></script>

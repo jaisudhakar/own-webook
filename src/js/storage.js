@@ -55,7 +55,8 @@
     ];
   }
 
-  function defaultBook() {
+  /** The feature tour book (sample pages explaining WeBook). */
+  function tourBook() {
     return {
       version: 1,
       title: 'My WeBook',
@@ -77,7 +78,8 @@
       image: typeof p.image === 'string' && p.image.startsWith('data:image/') ? p.image : '',
       theme: pick(p.theme, ['classic', 'parchment', 'lined', 'grid', 'rose', 'mint', 'midnight'], 'classic'),
       font: pick(p.font, ['serif', 'sans', 'hand', 'mono'], 'serif'),
-      align: pick(p.align, ['left', 'justify', 'center'], 'left')
+      align: pick(p.align, ['left', 'justify', 'center'], 'left'),
+      imageStyle: pick(p.imageStyle, ['photo', 'round', 'wide'], 'photo')
     };
   }
 
@@ -92,8 +94,24 @@
       subtitle: str(b.subtitle, 120, ''),
       author: str(b.author, 80, ''),
       cover: /^#[0-9a-f]{6}$/i.test(b.cover) ? b.cover : COVER_COLORS[0],
+      coverImage: typeof b.coverImage === 'string' && b.coverImage.startsWith('data:image/') ? b.coverImage : '',
       pages: b.pages.map(sanitizePage)
     };
+  }
+
+  /** Demo books: 'portfolio' (from js/demo-portfolio.js) or 'tour'. */
+  function demoBook(name) {
+    const demos = window.WeBookDemos || {};
+    if (name !== 'tour' && demos[name]) {
+      const copy = JSON.parse(JSON.stringify(demos[name]));
+      copy.pages.forEach((p) => { p.id = uid(); p.createdAt = Date.now(); });
+      return sanitizeBook(copy);
+    }
+    return sanitizeBook(tourBook());
+  }
+
+  function defaultBook() {
+    return demoBook('portfolio');
   }
 
   function load() {
@@ -177,6 +195,6 @@
 
   window.WeBookStore = {
     COVER_COLORS, uid, load, save, loadPrefs, savePrefs,
-    defaultBook, sanitizePage, exportFile, importFile, readImage
+    defaultBook, demoBook, sanitizePage, exportFile, importFile, readImage
   };
 })();

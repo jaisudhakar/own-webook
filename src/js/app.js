@@ -161,6 +161,7 @@
       theme: $('fTheme').value,
       font: $('fFont').value,
       align: $('fAlign').value,
+      imageStyle: $('fImageStyle').value,
       image: draftImage
     };
   }
@@ -188,6 +189,7 @@
     $('fTheme').value = page ? page.theme : 'classic';
     $('fFont').value = page ? page.font : 'serif';
     $('fAlign').value = page ? page.align : 'left';
+    $('fImageStyle').value = page ? page.imageStyle : 'photo';
     $('fImage').value = '';
     draftImage = page ? page.image : '';
     $('fPosition').value = flip.current > 0 && flip.current < flip.count ? 'current' : 'end';
@@ -291,6 +293,38 @@
 
   // --------------------------------------------------------------- settings
   let draftCover = book.cover;
+  let draftCoverImage = book.coverImage || '';
+
+  function showCoverThumb() {
+    const t = $('sCoverThumb');
+    t.style.backgroundImage = draftCoverImage ? `url("${draftCoverImage}")` : '';
+    t.classList.toggle('empty', !draftCoverImage);
+  }
+
+  $('sCoverImage').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    Store.readImage(file, 500)
+      .then((dataUrl) => { draftCoverImage = dataUrl; showCoverThumb(); })
+      .catch((err) => toast(err.message, 'error'));
+  });
+  $('sCoverImageClear').addEventListener('click', () => {
+    draftCoverImage = '';
+    $('sCoverImage').value = '';
+    showCoverThumb();
+  });
+
+  document.querySelectorAll('[data-demo]').forEach((b) => {
+    b.addEventListener('click', () => {
+      if (!window.confirm('Open this demo book? It replaces the book you have now (export it first to keep a copy).')) return;
+      stopReading();
+      book = Store.demoBook(b.dataset.demo);
+      persist();
+      closeModal('settingsModal');
+      rebuild(0);
+      toast(`Opened "${book.title}" ✓`);
+    });
+  });
   function renderSwatches() {
     const host = $('sCover');
     host.textContent = '';
@@ -312,6 +346,9 @@
     $('sSubtitle').value = book.subtitle;
     $('sAuthor').value = book.author;
     draftCover = book.cover;
+    draftCoverImage = book.coverImage || '';
+    $('sCoverImage').value = '';
+    showCoverThumb();
     renderSwatches();
     fillVoices();
     $('sRate').value = prefs.rate || 1;
@@ -325,6 +362,7 @@
     book.subtitle = $('sSubtitle').value.trim();
     book.author = $('sAuthor').value.trim();
     book.cover = draftCover;
+    book.coverImage = draftCoverImage;
     persist();
     closeModal('settingsModal');
     rebuild(flip.current);
@@ -333,8 +371,10 @@
 
   $('btnResetBook').addEventListener('click', () => {
     if (!window.confirm('Start a brand-new book? Your current book will be replaced (export it first to keep a copy).')) return;
-    book = Store.defaultBook();
+    book = Store.demoBook('tour');
     book.pages = [];
+    book.title = 'My WeBook';
+    book.subtitle = 'A book of my own';
     persist();
     closeModal('settingsModal');
     rebuild(0);

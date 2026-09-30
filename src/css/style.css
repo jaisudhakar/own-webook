@@ -431,7 +431,7 @@ body.ready .book-wrap { animation: bookArrive 1.2s cubic-bezier(.2, .8, .2, 1) 0
 .page-body p { margin: 0 0 0.8em; }
 .align-justify .page-body { text-align: justify; hyphens: auto; }
 .align-center .page-body { text-align: center; }
-.font-serif:not(.align-center) .page-body > p:first-child::first-letter {
+.drop-cap.font-serif:not(.align-center) .page-body > p:first-child::first-letter {
   float: left;
   font-size: 3.1em;
   line-height: 0.85;
@@ -439,7 +439,7 @@ body.ready .book-wrap { animation: bookArrive 1.2s cubic-bezier(.2, .8, .2, 1) 0
   font-weight: 700;
   color: #8a3b1f;
 }
-.theme-midnight.font-serif .page-body > p:first-child::first-letter { color: #ffd98a; }
+.drop-cap.theme-midnight.font-serif:not(.align-center) .page-body > p:first-child::first-letter { color: #ffd98a; }
 
 .page-figure {
   margin: 0 auto 1em;
@@ -889,6 +889,81 @@ body.night .page:not(.cover) { filter: brightness(0.9) sepia(0.12); }
 .toast.error { background: rgba(120, 25, 20, 0.95); }
 .toast.out { opacity: 0; transform: translateY(12px) scale(0.95); }
 
+/* --------------------------------------------------------- picture styles */
+.cover-portrait,
+.page-figure.style-round {
+  position: relative;
+  border-radius: 50%;
+  animation: portraitFloat 5s ease-in-out infinite;
+}
+.cover-portrait {
+  width: 8.5em;
+  height: 8.5em;
+  margin-bottom: 0.4em;
+  flex: none;
+}
+.cover-portrait::before,
+.page-figure.style-round::before {
+  content: '';
+  position: absolute;
+  inset: -0.32em;
+  width: auto;
+  height: auto;
+  border-radius: 50%;
+  transform: none;
+  background: conic-gradient(#f3d58c, #b8862e, #fff1c4, #c89236, #f3d58c);
+  box-shadow: 0 0 1.4em rgba(243, 213, 140, 0.45);
+  animation: ringSpin 7s linear infinite;
+}
+.cover-portrait img,
+.page-figure.style-round img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 0.22em solid var(--cover, #fdfaf3);
+}
+.cover-frame.has-portrait .cover-title { font-size: 2.3em; }
+.cover-frame.has-portrait .cover-ornament.bottom { display: none; }
+.cover-frame.has-portrait { padding-top: 6%; padding-bottom: 6%; }
+
+.page-figure.style-round {
+  width: 10em;
+  height: 10em;
+  max-width: 70%;
+  margin: 0.4em auto 1.3em;
+  padding: 0;
+  background: none;
+  box-shadow: 0 0.6em 1.4em rgba(0, 0, 0, 0.25);
+  transform: none;
+}
+.page-figure.style-round img { border-color: #fffdf7; }
+
+.page-figure.style-wide {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  transform: none;
+  border-radius: 0.4em;
+  overflow: hidden;
+}
+.page-figure.style-wide::before { display: none; }
+.page-figure.style-wide img { width: 100%; }
+
+.cover-thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: center / cover no-repeat;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.cover-thumb.empty { background: none; box-shadow: none; border: 2px dashed var(--field-border); }
+.demo-books .row .btn { flex: 1; }
+
 /* ------------------------------------------------------------- read aloud */
 .btn.active {
   background: linear-gradient(180deg, rgba(240, 185, 92, 0.45), rgba(201, 119, 43, 0.45));
@@ -1013,6 +1088,8 @@ body.reader-on .face.visible .readable:hover:not(.speaking) {
 @keyframes speakSweep { from { background-position: 150% 0, 0 0; } to { background-position: -150% 0, 0 0; } }
 @keyframes speakGlow { 0%, 100% { box-shadow: 0 0 0 0.3em rgba(255, 205, 110, 0.22), 0 0 0.8em rgba(255, 190, 80, 0.25); } 50% { box-shadow: 0 0 0 0.3em rgba(255, 205, 110, 0.38), 0 0 1.6em rgba(255, 190, 80, 0.5); } }
 @keyframes activePulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(224, 166, 75, 0.25), 0 0 12px rgba(224, 166, 75, 0.3); } 50% { box-shadow: 0 0 0 3px rgba(224, 166, 75, 0.4), 0 0 22px rgba(224, 166, 75, 0.6); } }
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+@keyframes portraitFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-0.25em); } }
 @keyframes previewFloat { 0%, 100% { transform: translateY(0) rotate(-0.6deg); } 50% { transform: translateY(-5px) rotate(0.6deg); } }
 
 /* ------------------------------------------------------------- responsive */
