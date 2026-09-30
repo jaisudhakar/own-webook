@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; media-src 'self' data: blob:">
+  <title>WeBook</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <header class="toolbar" role="toolbar" aria-label="Book controls">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">📖</span>
+      <span class="brand-name" id="brandTitle">WeBook</span>
+    </div>
+
+    <div class="tool-group">
+      <button class="btn" id="btnFirst" title="Front cover (Home)" aria-label="Front cover">⏮</button>
+      <button class="btn" id="btnPrev" title="Previous page (←)" aria-label="Previous page">◀</button>
+      <span class="page-indicator" id="pageIndicator" aria-live="polite">Cover</span>
+      <button class="btn" id="btnNext" title="Next page (→)" aria-label="Next page">▶</button>
+      <button class="btn" id="btnLast" title="Back cover (End)" aria-label="Back cover">⏭</button>
+    </div>
+
+    <div class="tool-group">
+      <button class="btn btn-primary" id="btnNew" title="Create a new page (N)">＋ New Page</button>
+      <button class="btn" id="btnToc" title="Contents (T)" aria-label="Contents">☰</button>
+      <button class="btn" id="btnSettings" title="Book settings" aria-label="Book settings">⚙</button>
+      <button class="btn" id="btnSound" title="Page sound (M)" aria-label="Toggle sound">🔊</button>
+      <button class="btn" id="btnTheme" title="Night mode (D)" aria-label="Toggle night mode">🌙</button>
+      <button class="btn" id="btnExport" title="Export book as file" aria-label="Export book">⤓</button>
+      <button class="btn" id="btnImport" title="Import book from file" aria-label="Import book">⤒</button>
+      <button class="btn" id="btnFullscreen" title="Fullscreen (F)" aria-label="Fullscreen">⛶</button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="book-wrap" id="bookWrap">
+      <div class="book" id="book">
+        <div class="book-shadow" aria-hidden="true"></div>
+        <div class="leaves" id="leaves"></div>
+        <div class="ribbon" aria-hidden="true"></div>
+      </div>
+    </div>
+    <p class="hint" id="hint">Drag a page corner, click a page, or use ← → to flip</p>
+  </main>
+
+  <!-- Contents drawer -->
+  <aside class="drawer" id="tocDrawer" aria-label="Contents" aria-hidden="true">
+    <div class="drawer-head">
+      <h2>Contents</h2>
+      <button class="btn btn-ghost" data-close="tocDrawer" aria-label="Close contents">✕</button>
+    </div>
+    <ol class="toc-list" id="tocList"></ol>
+  </aside>
+
+  <!-- Page editor -->
+  <div class="modal" id="editorModal" role="dialog" aria-modal="true" aria-labelledby="editorTitle" aria-hidden="true">
+    <div class="modal-card modal-wide">
+      <div class="modal-head">
+        <h2 id="editorTitle">New Page</h2>
+        <button class="btn btn-ghost" data-close="editorModal" aria-label="Close">✕</button>
+      </div>
+      <form id="editorForm" class="editor">
+        <div class="editor-fields">
+          <label>Title
+            <input type="text" id="fTitle" maxlength="120" placeholder="Chapter title" autocomplete="off">
+          </label>
+          <label>Text
+            <textarea id="fBody" rows="9" placeholder="Write your page… (**bold**, *italic*, blank line = new paragraph)"></textarea>
+          </label>
+          <div class="row">
+            <label>Paper
+              <select id="fTheme">
+                <option value="classic">Classic paper</option>
+                <option value="parchment">Old parchment</option>
+                <option value="lined">Lined notebook</option>
+                <option value="grid">Grid paper</option>
+                <option value="rose">Rose</option>
+                <option value="mint">Mint</option>
+                <option value="midnight">Midnight</option>
+              </select>
+            </label>
+            <label>Text style
+              <select id="fFont">
+                <option value="serif">Book serif</option>
+                <option value="sans">Clean sans</option>
+                <option value="hand">Handwritten</option>
+                <option value="mono">Typewriter</option>
+              </select>
+            </label>
+            <label>Align
+              <select id="fAlign">
+                <option value="left">Left</option>
+                <option value="justify">Justify</option>
+                <option value="center">Center</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label class="file-label">Picture
+              <input type="file" id="fImage" accept="image/*">
+            </label>
+            <button type="button" class="btn btn-ghost" id="fImageClear">Remove picture</button>
+          </div>
+          <label id="fPositionWrap">Insert
+            <select id="fPosition">
+              <option value="current">After the page I'm reading</option>
+              <option value="end">At the end of the book</option>
+              <option value="start">At the beginning</option>
+            </select>
+          </label>
+        </div>
+        <div class="editor-preview">
+          <span class="preview-label">Live preview</span>
+          <div class="preview-page" id="previewPage"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-danger" id="btnDeletePage">Delete page</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn" data-close="editorModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSavePage">Add Page</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Book settings -->
+  <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="settingsTitle">Book Settings</h2>
+        <button class="btn btn-ghost" data-close="settingsModal" aria-label="Close">✕</button>
+      </div>
+      <form id="settingsForm" class="editor-fields">
+        <label>Book title
+          <input type="text" id="sTitle" maxlength="80" autocomplete="off">
+        </label>
+        <label>Subtitle
+          <input type="text" id="sSubtitle" maxlength="120" autocomplete="off">
+        </label>
+        <label>Author
+          <input type="text" id="sAuthor" maxlength="80" autocomplete="off">
+        </label>
+        <label>Cover colour</label>
+        <div class="swatches" id="sCover" role="radiogroup" aria-label="Cover colour"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-danger" id="btnResetBook">Start a new book</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn" data-close="settingsModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <input type="file" id="importInput" accept=".json,.webook,application/json" hidden>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/flipbook.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

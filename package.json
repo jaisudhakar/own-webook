@@ -1,0 +1,67 @@
+{
+  "name": "own-webook",
+  "productName": "WeBook",
+  "version": "1.0.0",
+  "description": "A 3D flip-page web book for Windows, Ubuntu and the browser: create pages, flip them, enjoy the animations.",
+  "main": "electron/main.js",
+  "desktopName": "webook.desktop",
+  "author": "jaisudhakar",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "web": "node scripts/serve.js",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.jaisudhakar.webook",
+    "productName": "WeBook",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office",
+      "icon": "build/icon.png",
+      "maintainer": "jaisudhakar <jaisudhakar96@gmail.com>",
+      "synopsis": "3D flip-page book editor",
+      "syncDesktopName": true
+    }
+  }
+}
