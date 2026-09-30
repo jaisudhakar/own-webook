@@ -41,6 +41,10 @@ function buildMenu() {
         { label: 'Toggle Night Mode', accelerator: 'CmdOrCtrl+D', click: () => send('theme') },
         { label: 'Toggle Page Sound', accelerator: 'CmdOrCtrl+M', click: () => send('sound') },
         { type: 'separator' },
+        { label: 'Read Aloud on Hover', accelerator: 'CmdOrCtrl+R', click: () => send('read') },
+        { label: 'Read This Page Aloud', accelerator: 'CmdOrCtrl+L', click: () => send('read-page') },
+        { label: 'Stop Reading', accelerator: 'CmdOrCtrl+.', click: () => send('stop-reading') },
+        { type: 'separator' },
         { role: 'resetZoom' },
         { role: 'zoomIn' },
         { role: 'zoomOut' },
@@ -99,6 +103,10 @@ function createWindow() {
 // Some Linux setups (VMs, older GPUs) render 3D transforms badly with GPU
 // compositing; allow opting out with WEBOOK_DISABLE_GPU=1.
 if (process.env.WEBOOK_DISABLE_GPU === '1') app.disableHardwareAcceleration();
+
+// Read aloud: on Linux, Chromium only talks to the system voices
+// (speech-dispatcher / espeak-ng) when this switch is set.
+if (process.platform === 'linux') app.commandLine.appendSwitch('enable-speech-dispatcher');
 
 app.whenReady().then(() => {
   buildMenu();

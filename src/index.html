@@ -30,6 +30,7 @@
       <button class="btn btn-primary" id="btnNew" title="Create a new page (N)">＋ New Page</button>
       <button class="btn" id="btnToc" title="Contents (T)" aria-label="Contents">☰</button>
       <button class="btn" id="btnSettings" title="Book settings" aria-label="Book settings">⚙</button>
+      <button class="btn" id="btnRead" title="Read aloud on hover (R)" aria-label="Read aloud on hover" aria-pressed="false">🗣</button>
       <button class="btn" id="btnSound" title="Page sound (M)" aria-label="Toggle sound">🔊</button>
       <button class="btn" id="btnTheme" title="Night mode (D)" aria-label="Toggle night mode">🌙</button>
       <button class="btn" id="btnExport" title="Export book as file" aria-label="Export book">⤓</button>
@@ -148,6 +149,19 @@
         </label>
         <label>Cover colour</label>
         <div class="swatches" id="sCover" role="radiogroup" aria-label="Cover colour"></div>
+        <fieldset class="voice-settings">
+          <legend>🗣 Read-aloud voice</legend>
+          <label>Voice
+            <select id="sVoice"></select>
+          </label>
+          <div class="row">
+            <label>Speed <span class="rate-value" id="sRateValue">1.0×</span>
+              <input type="range" id="sRate" min="0.5" max="2" step="0.1" value="1">
+            </label>
+            <button type="button" class="btn" id="btnVoiceTest">▶ Test voice</button>
+          </div>
+          <p class="voice-note" id="voiceNote"></p>
+        </fieldset>
         <div class="modal-actions">
           <button type="button" class="btn btn-danger" id="btnResetBook">Start a new book</button>
           <span class="spacer"></span>
@@ -158,11 +172,20 @@
     </div>
   </div>
 
+  <!-- Read-aloud status bar -->
+  <div class="reader-bar" id="readerBar" role="status" aria-live="polite" hidden>
+    <div class="wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <span class="reader-text" id="readerText">Reading…</span>
+    <button class="btn btn-ghost" id="btnReadPause" title="Pause / resume" aria-label="Pause or resume reading">⏸</button>
+    <button class="btn btn-ghost" id="btnReadStop" title="Stop reading (Esc)" aria-label="Stop reading">⏹</button>
+  </div>
+
   <input type="file" id="importInput" accept=".json,.webook,application/json" hidden>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
   <script src="js/storage.js"></script>
   <script src="js/effects.js"></script>
+  <script src="js/reader.js"></script>
   <script src="js/render.js"></script>
   <script src="js/flipbook.js"></script>
   <script src="js/app.js"></script>

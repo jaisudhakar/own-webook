@@ -291,6 +291,8 @@ body.ready .book-wrap { animation: bookArrive 1.2s cubic-bezier(.2, .8, .2, 1) 0
   transform: rotateY(180deg);
   border-radius: 6px 2px 2px 6px;
 }
+.leaf.on-left .face.front,
+.leaf:not(.on-left) .face.back { pointer-events: none; }
 
 /* the crease by the spine */
 .face::after {
@@ -887,6 +889,106 @@ body.night .page:not(.cover) { filter: brightness(0.9) sepia(0.12); }
 .toast.error { background: rgba(120, 25, 20, 0.95); }
 .toast.out { opacity: 0; transform: translateY(12px) scale(0.95); }
 
+/* ------------------------------------------------------------- read aloud */
+.btn.active {
+  background: linear-gradient(180deg, rgba(240, 185, 92, 0.45), rgba(201, 119, 43, 0.45));
+  border-color: rgba(255, 220, 160, 0.7);
+  box-shadow: 0 0 0 3px rgba(224, 166, 75, 0.25), 0 0 18px rgba(224, 166, 75, 0.45);
+  animation: activePulse 2.4s ease-in-out infinite;
+}
+
+body.reader-on .face.visible .readable {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'><path fill='%23f0b95c' stroke='%232b1a0f' stroke-width='1.2' stroke-linejoin='round' d='M3 9h4l5-4v14l-5-4H3z'/><path fill='none' stroke='%232b1a0f' stroke-width='3.2' stroke-linecap='round' d='M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13'/><path fill='none' stroke='%23f0b95c' stroke-width='1.8' stroke-linecap='round' d='M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13'/></svg>") 6 14, help;
+  border-radius: 0.3em;
+  transition: background-color 0.25s, box-shadow 0.25s;
+}
+body.reader-on .face.visible .readable:hover:not(.speaking) {
+  background-color: rgba(255, 205, 110, 0.18);
+  box-shadow: 0 0 0 0.25em rgba(255, 205, 110, 0.18);
+}
+
+.readable.speaking {
+  border-radius: 0.3em;
+  background:
+    linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.45) 50%, transparent 80%) 0 0 / 250% 100% no-repeat,
+    rgba(255, 205, 110, 0.28);
+  box-shadow: 0 0 0 0.3em rgba(255, 205, 110, 0.28), 0 0 1.2em rgba(255, 190, 80, 0.35);
+  animation: speakSweep 2.2s linear infinite, speakGlow 1.6s ease-in-out infinite;
+}
+.theme-midnight .readable.speaking,
+.cover .readable.speaking {
+  background-color: rgba(255, 215, 130, 0.2);
+}
+
+::highlight(webook-word) {
+  background-color: rgba(255, 170, 40, 0.65);
+  color: #1d1206;
+}
+
+.reader-bar {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(460px, calc(100vw - 36px));
+  padding: 8px 8px 8px 16px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px) scale(0.95);
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(.2, 1.3, .4, 1);
+}
+.reader-bar.show { opacity: 1; pointer-events: auto; transform: none; }
+.reader-bar .btn { min-width: 34px; height: 34px; padding: 0 8px; font-size: 18px; }
+.reader-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ui-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wave { display: flex; align-items: center; gap: 3px; height: 22px; }
+.wave span {
+  width: 4px;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ffe2a8, #e0a64b);
+  transform-origin: 50% 50%;
+  animation: wave 1s ease-in-out infinite;
+}
+.wave span:nth-child(2) { animation-delay: -0.8s; }
+.wave span:nth-child(3) { animation-delay: -0.55s; }
+.wave span:nth-child(4) { animation-delay: -0.3s; }
+.wave span:nth-child(5) { animation-delay: -0.15s; }
+.reader-bar.paused .wave span,
+.reader-bar.paused .readable { animation-play-state: paused; }
+
+.voice-settings {
+  margin: 4px 0 0;
+  padding: 10px 14px 12px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.voice-settings legend { padding: 0 6px; font-size: 13px; font-weight: 700; }
+.voice-settings input[type='range'] { accent-color: var(--accent-2); width: 100%; }
+.rate-value { font-weight: 400; opacity: 0.75; margin-left: 4px; }
+.voice-note { margin: 0; font-size: 12.5px; color: var(--danger); user-select: text; }
+.voice-note:empty { display: none; }
+
 /* ------------------------------------------------------------- keyframes */
 @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes bookArrive {
@@ -907,6 +1009,10 @@ body.night .page:not(.cover) { filter: brightness(0.9) sepia(0.12); }
 @keyframes vanish { to { opacity: 0; filter: blur(6px); transform: scale(0.92) rotate(-2deg); } }
 @keyframes slideIn { to { opacity: 1; transform: none; } }
 @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: none; } }
+@keyframes wave { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
+@keyframes speakSweep { from { background-position: 150% 0, 0 0; } to { background-position: -150% 0, 0 0; } }
+@keyframes speakGlow { 0%, 100% { box-shadow: 0 0 0 0.3em rgba(255, 205, 110, 0.22), 0 0 0.8em rgba(255, 190, 80, 0.25); } 50% { box-shadow: 0 0 0 0.3em rgba(255, 205, 110, 0.38), 0 0 1.6em rgba(255, 190, 80, 0.5); } }
+@keyframes activePulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(224, 166, 75, 0.25), 0 0 12px rgba(224, 166, 75, 0.3); } 50% { box-shadow: 0 0 0 3px rgba(224, 166, 75, 0.4), 0 0 22px rgba(224, 166, 75, 0.6); } }
 @keyframes previewFloat { 0%, 100% { transform: translateY(0) rotate(-0.6deg); } 50% { transform: translateY(-5px) rotate(0.6deg); } }
 
 /* ------------------------------------------------------------- responsive */

@@ -78,6 +78,9 @@
       el.style.setProperty('--front-shade', (p < 0.5 ? p * 1.1 : 0.55).toFixed(3));
       el.style.setProperty('--back-shade', (p > 0.5 ? (1 - p) * 1.1 : 0.55).toFixed(3));
       el.style.zIndex = this._z(leaf);
+      // Only the face turned towards the reader may receive the mouse;
+      // browsers otherwise hit-test the hidden face of a turned page.
+      el.classList.toggle('on-left', angle < -90);
     }
 
     _z(leaf) {
@@ -203,6 +206,12 @@
     /** Shows the spread containing face index f. */
     goToFace(f) {
       return this.goTo(f % 2 === 0 ? f / 2 : (f + 1) / 2);
+    }
+
+    /** The DOM face (front or back of a leaf) that shows face index f. */
+    faceElement(f) {
+      const leaf = this.leaves[Math.floor(f / 2)];
+      return leaf ? leaf.el.children[f % 2] : null;
     }
 
     jumpToFace(f) {

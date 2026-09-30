@@ -17,7 +17,7 @@
   const flip = new window.FlipBook({
     book: bookEl,
     leaves: $('leaves'),
-    onChange: updateIndicator
+    onChange: (c) => { updateIndicator(c); onPageChange(c); }
   });
 
   // ------------------------------------------------------------------ utils
@@ -313,6 +313,9 @@
     $('sAuthor').value = book.author;
     draftCover = book.cover;
     renderSwatches();
+    fillVoices();
+    $('sRate').value = prefs.rate || 1;
+    showRate($('sRate').value);
     openModal('settingsModal');
   }
 
@@ -357,10 +360,164 @@
   bookEl.addEventListener('click', (e) => {
     const t = e.target.closest('button');
     if (!t) return;
-    if (t.dataset.goto) goToFace(Number(t.dataset.goto));
+    if (t.dataset.read) readFrom(Number(t.dataset.read));
+    else if (t.dataset.goto) goToFace(Number(t.dataset.goto));
     else if (t.dataset.edit) openEditor(t.dataset.edit);
     else if (t.dataset.delete) deletePage(t.dataset.delete);
     else if (t.dataset.action === 'new-page') openEditor(null);
+  });
+
+  // ------------------------------------------------------------- read aloud
+  const Reader = window.WeBookReader;
+  const isLinux = /Linux/i.test(navigator.userAgent) && !/Android/i.test(navigator.userAgent);
+  const NO_VOICES = isLinux
+    ? 'No voices found. On Ubuntu install them with: sudo apt install speech-dispatcher espeak-ng'
+    : 'No text-to-speech voices are installed on this system.';
+  let hoverRead = false;
+  let hoverEl = null;
+  let hoverTimer = 0;
+  let readToken = 0;
+  let readerFlipping = false;
+  let lastSpread = 0;
+
+  function stopReading() {
+    readToken++;
+    Reader.stop();
+  }
+
+  /** Stop reading when the reader turns the page by hand. */
+  function onPageChange(c) {
+    if (c !== lastSpread && !readerFlipping) stopReading();
+    lastSpread = c;
+  }
+
+  function checkSupport() {
+    if (Reader.supported) return true;
+    toast('Read aloud is not supported here. Try Chrome, Edge or Firefox.', 'error');
+    return false;
+  }
+
+  function warnIfNoVoices() {
+    setTimeout(() => { if (!Reader.voices().length) toast(NO_VOICES, 'error'); }, 1200);
+  }
+
+  function setHoverRead(on) {
+    if (on && !checkSupport()) return;
+    hoverRead = on;
+    document.body.classList.toggle('reader-on', on);
+    $('btnRead').classList.toggle('active', on);
+    $('btnRead').setAttribute('aria-pressed', String(on));
+    if (!on) {
+      clearTimeout(hoverTimer);
+      hoverEl = null;
+      stopReading();
+    }
+  }
+
+  function toggleHoverRead() {
+    setHoverRead(!hoverRead);
+    if (!Reader.supported) return;
+    toast(hoverRead ? '🗣 Read aloud is on. Hover over any text to hear it.' : 'Read aloud is off');
+    if (hoverRead) warnIfNoVoices();
+  }
+
+  // Hovering over a title or paragraph reads it after a short pause.
+  bookEl.addEventListener('pointerover', (e) => {
+    if (!hoverRead || e.pointerType === 'touch' || flip.busy) return;
+    const el = e.target.closest('.face.visible .readable');
+    if (!el || el === hoverEl) return;
+    hoverEl = el;
+    clearTimeout(hoverTimer);
+    if (el === Reader.speakingElement) return;
+    hoverTimer = setTimeout(() => {
+      if (hoverEl !== el || !hoverRead || flip.busy) return;
+      readToken++;
+      Reader.speak([el]);
+    }, 350);
+  });
+
+  bookEl.addEventListener('pointerout', (e) => {
+    const el = e.target.closest && e.target.closest('.readable');
+    if (!el || el !== hoverEl || el.contains(e.relatedTarget)) return;
+    hoverEl = null;
+    clearTimeout(hoverTimer);
+  });
+
+  /** Reads from face f onwards, turning pages like an audiobook. */
+  async function readFrom(f) {
+    if (!checkSupport()) return;
+    const token = ++readToken;
+    while (f < faces.length && faces[f].type !== 'back') {
+      const spread = f % 2 === 0 ? f / 2 : (f + 1) / 2;
+      if (flip.current !== spread) {
+        readerFlipping = true;
+        await flip.goToFace(f);
+        readerFlipping = false;
+        if (token !== readToken) return;
+      }
+      const els = Array.from(flip.faceElement(f).querySelectorAll('.readable'));
+      if (els.length && !(await Reader.speak(els))) return;
+      if (token !== readToken) return;
+      f++;
+    }
+    toast('Finished reading 📖');
+  }
+
+  function readCurrentPage() {
+    const c = flip.current;
+    readFrom(c === 0 ? 0 : Math.min(2 * c - 1, faces.length - 1));
+  }
+
+  Reader.onChange((state) => {
+    const bar = $('readerBar');
+    bar.classList.toggle('show', state.speaking);
+    bar.classList.toggle('paused', state.paused);
+    $('readerText').textContent = state.text.length > 70 ? state.text.slice(0, 68) + '…' : state.text;
+    $('btnReadPause').textContent = state.paused ? '▶' : '⏸';
+  });
+  $('btnReadPause').addEventListener('click', () => Reader.togglePause());
+  $('btnReadStop').addEventListener('click', stopReading);
+
+  // voice settings
+  function fillVoices() {
+    const sel = $('sVoice');
+    const list = Reader.voices().slice().sort((a, b) => a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
+    sel.textContent = '';
+    $('voiceNote').textContent = Reader.supported ? (list.length ? '' : NO_VOICES) : 'Read aloud is not supported here.';
+    if (!list.length) {
+      sel.add(new Option('System default', ''));
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
+    list.forEach((v) => sel.add(new Option(`${v.name} (${v.lang})`, v.voiceURI)));
+    sel.value = Reader.voiceURI;
+  }
+
+  function showRate(r) {
+    $('sRateValue').textContent = Number(r).toFixed(1) + '×';
+  }
+
+  $('sVoice').addEventListener('change', (e) => {
+    Reader.setVoice(e.target.value);
+    prefs.voice = e.target.value;
+    Store.savePrefs(prefs);
+  });
+  $('sRate').addEventListener('input', (e) => {
+    Reader.setRate(e.target.value);
+    prefs.rate = Number(e.target.value);
+    showRate(e.target.value);
+    Store.savePrefs(prefs);
+  });
+  $('btnVoiceTest').addEventListener('click', () => {
+    if (!checkSupport()) return;
+    const sample = document.createElement('span');
+    sample.textContent = `Hello! This is how "${book.title || 'your book'}" will sound when it is read aloud.`;
+    readToken++;
+    Reader.speak([sample]);
+  });
+  Reader.onVoicesChanged(() => {
+    if ($('settingsModal').classList.contains('open')) fillVoices();
   });
 
   // --------------------------------------------------------------- toolbar
@@ -416,6 +573,9 @@
     theme: () => setNight(!prefs.night),
     sound: () => setSound(!prefs.sound),
     fullscreen: toggleFullscreen,
+    read: toggleHoverRead,
+    'read-page': readCurrentPage,
+    'stop-reading': stopReading,
     next: () => go('next'),
     prev: () => go('prev'),
     first: () => go('first'),
@@ -424,7 +584,7 @@
 
   const buttons = {
     btnFirst: 'first', btnPrev: 'prev', btnNext: 'next', btnLast: 'last',
-    btnNew: 'new-page', btnToc: 'toc', btnSettings: 'settings', btnSound: 'sound',
+    btnNew: 'new-page', btnToc: 'toc', btnSettings: 'settings', btnSound: 'sound', btnRead: 'read',
     btnTheme: 'theme', btnExport: 'export', btnImport: 'import', btnFullscreen: 'fullscreen'
   };
   Object.keys(buttons).forEach((id) => {
@@ -444,6 +604,7 @@
   // -------------------------------------------------------------- keyboard
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (!anyModalOpen() && Reader.speakingElement) stopReading();
       document.querySelectorAll('.modal.open').forEach((m) => closeModal(m.id));
       toggleToc(false);
       return;
@@ -458,7 +619,9 @@
       t: 'toc', T: 'toc',
       m: 'sound', M: 'sound',
       d: 'theme', D: 'theme',
-      f: 'fullscreen', F: 'fullscreen'
+      f: 'fullscreen', F: 'fullscreen',
+      r: 'read', R: 'read',
+      l: 'read-page', L: 'read-page'
     };
     const action = map[e.key];
     if (action) {
@@ -471,7 +634,7 @@
   if (window.webookDesktop) {
     document.body.classList.add('desktop', 'os-' + window.webookDesktop.platform);
     window.webookDesktop.onMenuAction((action) => {
-      if (anyModalOpen() && !['theme', 'sound'].includes(action)) return;
+      if (anyModalOpen() && !['theme', 'sound', 'stop-reading'].includes(action)) return;
       if (actions[action]) actions[action]();
     });
   }
@@ -480,6 +643,9 @@
   window.addEventListener('resize', fitBook);
   setNight(!!prefs.night);
   setSound(prefs.sound !== false);
+  Reader.setVoice(prefs.voice || '');
+  Reader.setRate(prefs.rate || 1);
+  $('readerBar').hidden = false;
   fitBook();
   rebuild(0);
   requestAnimationFrame(() => document.body.classList.add('ready'));

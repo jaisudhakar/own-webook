@@ -26,6 +26,16 @@ A 3D flip-page book you can write in. WeBook runs as a desktop app on **Windows*
 - Pages are turned in 3D with lighting and shadow that change as the page turns, a small lift and bend, and a tilt that follows your pointer
 - Jumping from the contents riffles through the pages in between
 
+**Read aloud (voice)**
+- Press **🗣** (or <kbd>R</kbd>) and hover over any title or paragraph to hear it read aloud
+- The paragraph being read glows and each word is highlighted as it's spoken
+- Use **🔊** on a page (or <kbd>L</kbd>) to read from that page onwards; the book turns its own pages as it reads
+- A bar at the bottom shows what's being read, with pause and stop buttons (<kbd>Esc</kbd> also stops)
+- Choose the voice and speed under **⚙ Book settings → Read-aloud voice**
+- Uses the voices already installed on your computer, so it works offline:
+  - **Windows:** built-in Microsoft voices, with more under *Settings → Time & language → Speech*
+  - **Ubuntu:** needs speech-dispatcher: `sudo apt install speech-dispatcher espeak-ng`, then restart WeBook
+
 **Extra animations**
 - Book entrance animation, a light that sweeps across the cover, and a bookmark ribbon that sways
 - The page corner lifts when your mouse gets near it
@@ -47,8 +57,10 @@ A 3D flip-page book you can write in. WeBook runs as a desktop app on **Windows*
 | <kbd>T</kbd> | Contents |
 | <kbd>D</kbd> | Night mode |
 | <kbd>M</kbd> | Sound on/off |
+| <kbd>R</kbd> | Read aloud on hover on/off |
+| <kbd>L</kbd> | Read from this page onwards |
 | <kbd>F</kbd> | Fullscreen |
-| <kbd>Esc</kbd> | Close dialogs |
+| <kbd>Esc</kbd> | Stop reading / close dialogs |
 
 The desktop app also has **File / Go / View** menus. For example, <kbd>Ctrl</kbd>+<kbd>N</kbd> creates a new page, <kbd>Ctrl</kbd>+<kbd>S</kbd> exports and <kbd>Ctrl</kbd>+<kbd>O</kbd> imports.
 
@@ -114,6 +126,7 @@ src/css/style.css     book, paper themes, animations
 src/js/flipbook.js    3D page-flip engine (click, drag, riffle, corner peek)
 src/js/render.js      turns the book model into page faces
 src/js/effects.js     particles, confetti, synthesised sounds
+src/js/reader.js      read aloud (Web Speech API), word highlighting
 src/js/storage.js     book model, autosave, import/export, image resizing
 src/js/app.js         toolbar, editor, settings, contents, keyboard
 scripts/serve.js      zero-dependency web server

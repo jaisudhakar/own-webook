@@ -21,7 +21,7 @@
         .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<em>$2</em>')
         .replace(/\n/g, '<br>'))
       .filter((p) => p.trim())
-      .map((p) => `<p>${p}</p>`)
+      .map((p) => `<p class="readable">${p}</p>`)
       .join('');
   }
 
@@ -45,14 +45,14 @@
   }
 
   function coverFace(book) {
-    const author = book.author ? `<p class="cover-author">${escapeHtml(book.author)}</p>` : '';
+    const author = book.author ? `<p class="cover-author readable">${escapeHtml(book.author)}</p>` : '';
     return el(`
       <div class="page cover" style="--cover:${book.cover}">
         <div class="cover-frame">
           <div class="cover-ornament">❦</div>
-          <h1 class="cover-title">${escapeHtml(book.title || 'Untitled')}</h1>
+          <h1 class="cover-title readable">${escapeHtml(book.title || 'Untitled')}</h1>
           <div class="cover-rule"></div>
-          <p class="cover-subtitle">${escapeHtml(book.subtitle || '')}</p>
+          <p class="cover-subtitle readable">${escapeHtml(book.subtitle || '')}</p>
           ${author}
           <div class="cover-ornament bottom">❦</div>
         </div>
@@ -65,7 +65,7 @@
     return el(`
       <div class="page cover back-cover" style="--cover:${book.cover}">
         <div class="back-emblem">📖</div>
-        <p class="back-text">${escapeHtml(book.title || 'Untitled')}</p>
+        <p class="back-text readable">${escapeHtml(book.title || 'Untitled')}</p>
         <p class="back-small">Made with WeBook · ${book.pages.length} page${book.pages.length === 1 ? '' : 's'}</p>
         <div class="cover-shine"></div>
       </div>`);
@@ -77,7 +77,7 @@
       .map((f) => `
         <li>
           <button type="button" class="toc-link" data-goto="${f.face}" data-no-flip>
-            <span class="toc-title">${escapeHtml(f.page.title || 'Untitled page')}</span>
+            <span class="toc-title readable">${escapeHtml(f.page.title || 'Untitled page')}</span>
             <span class="toc-dots"></span>
             <span class="toc-num">${f.face}</span>
           </button>
@@ -87,7 +87,7 @@
     return el(`
       <div class="page theme-parchment font-serif toc-page">
         <div class="page-inner">
-          <h2 class="page-title center">Contents</h2>
+          <h2 class="page-title center readable">Contents</h2>
           <div class="title-flourish">~ ✦ ~</div>
           ${items ? `<ol class="toc">${items}</ol>` : empty}
           <button type="button" class="toc-add" data-action="new-page" data-no-flip>＋ Add a new page</button>
@@ -99,7 +99,7 @@
   function pageFace(face) {
     const p = face.page;
     const img = p.image ? `<figure class="page-figure"><img src="${p.image}" alt=""></figure>` : '';
-    const title = p.title ? `<h2 class="page-title">${escapeHtml(p.title)}</h2>` : '';
+    const title = p.title ? `<h2 class="page-title readable">${escapeHtml(p.title)}</h2>` : '';
     return el(`
       <div class="page theme-${p.theme} font-${p.font} align-${p.align}" data-page-id="${escapeHtml(p.id)}">
         <div class="page-inner">
@@ -108,6 +108,7 @@
           <div class="page-body">${formatBody(p.body)}</div>
         </div>
         <div class="page-tools" data-no-flip>
+          <button type="button" class="tool" data-read="${face.face}" title="Read this page aloud" aria-label="Read this page aloud">🔊</button>
           <button type="button" class="tool" data-edit="${escapeHtml(p.id)}" title="Edit page" aria-label="Edit page">✎</button>
           <button type="button" class="tool danger" data-delete="${escapeHtml(p.id)}" title="Delete page" aria-label="Delete page">✕</button>
         </div>
@@ -119,7 +120,7 @@
     return el(`
       <div class="page theme-classic font-serif end-page">
         <div class="page-inner">
-          <div class="the-end">~ The End ~</div>
+          <div class="the-end readable">~ The End ~</div>
           <button type="button" class="toc-add" data-action="new-page" data-no-flip>＋ Keep writing</button>
         </div>
         <div class="page-num">${face.face}</div>
